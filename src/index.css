@@ -1,0 +1,56 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Outfit", sans-serif;
+  
+  --color-primary: #1B4332;
+  --color-accent: #7D6B5D;
+  --color-bg-base: #F9F8F4;
+  --color-success-light: #A3B18A;
+  --color-error-base: #EF4444;
+  --color-error-light: #FFE8E8;
+  
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  --radius-3xl: 2rem;
+  --radius-4xl: 2.5rem;
+}
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    background-color: var(--color-bg-base);
+  }
+  
+  body {
+    font-family: var(--font-sans);
+    overscroll-behavior-y: contain;
+    color: var(--color-primary);
+  }
+  
+  h1, h2, h3, h4, .font-display {
+    font-family: var(--font-display);
+    @apply font-black tracking-tighter uppercase;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #E5E7EB;
+  border-radius: 10px;
+}
+
+@layer utilities {
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "name": "Supari Management System",
+  "description": "Offline-first mobile business management system for areca nut processing factories.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
