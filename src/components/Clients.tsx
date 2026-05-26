@@ -91,6 +91,109 @@ export const Clients: React.FC = () => {
     setIsAdding(true);
   };
 
+  if (isAdding) {
+    return (
+      <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
+        <button 
+          onClick={() => {
+            hapticFeedback.light();
+            setIsAdding(false);
+            setEditingClient(null);
+          }}
+          className="mb-6 flex items-center gap-2 text-stone-500 font-bold hover:text-stone-800 transition-colors animate-fade-in"
+        >
+          <ArrowLeft size={18} /> Back to {editingClient ? 'Profile' : 'Directory'}
+        </button>
+
+        <div className="space-y-6">
+          <div>
+            <Heading className="text-2xl font-black">{editingClient ? 'Edit Client Profile' : 'New Client Registration'}</Heading>
+            <Subtext>{editingClient ? 'Update supplier information' : 'Create profile for processing and payouts'}</Subtext>
+          </div>
+
+          <Card className="p-6">
+            <form onSubmit={handleSaveClient} className="space-y-4">
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-stone-400 uppercase ml-2">Name *</label>
+                <input 
+                  required
+                  type="text" 
+                  autoFocus={!editingClient}
+                  placeholder="e.g. Ramesh Patel"
+                  className="w-full bg-stone-50 dark:bg-stone-800/60 border border-stone-100 dark:border-stone-800 h-14 px-4 rounded-xl text-xs font-bold outline-none focus:border-stone-300 transition-colors placeholder:text-stone-400 placeholder:opacity-60 text-primary"
+                  value={formData.fullName}
+                  onChange={(e) => setFormData({...formData, fullName: e.target.value})}
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-stone-400 uppercase ml-2">Phone</label>
+                <input 
+                  type="tel" 
+                  placeholder="+91..."
+                  className="w-full bg-stone-50 dark:bg-stone-800/60 border border-stone-100 dark:border-stone-800 h-14 px-4 rounded-xl text-xs font-bold outline-none focus:border-stone-300 transition-colors placeholder:text-stone-400 placeholder:opacity-60 text-primary"
+                  value={formData.phoneNumber}
+                  onChange={(e) => setFormData({...formData, phoneNumber: e.target.value})}
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-stone-400 uppercase ml-2">Address</label>
+                <input 
+                  type="text" 
+                  placeholder="Street, Village..."
+                  className="w-full bg-stone-50 dark:bg-stone-800/60 border border-stone-100 dark:border-stone-800 h-14 px-4 rounded-xl text-xs font-bold outline-none focus:border-stone-300 transition-colors placeholder:text-stone-400 placeholder:opacity-60 text-primary"
+                  value={formData.address}
+                  onChange={(e) => setFormData({...formData, address: e.target.value})}
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-stone-400 uppercase ml-2">Rate ({settings.currencySymbol}/KG)</label>
+                <input 
+                  type="number" 
+                  step="0.01"
+                  className="w-full bg-stone-50 dark:bg-stone-800/60 border border-stone-100 dark:border-stone-800 h-14 px-4 rounded-xl text-xs font-bold outline-none focus:border-stone-300 transition-colors placeholder:text-stone-400 placeholder:opacity-60 text-primary"
+                  value={formData.fallbackRate}
+                  onChange={(e) => setFormData({...formData, fallbackRate: parseFloat(e.target.value) || 0})}
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-stone-400 uppercase ml-2">Notes</label>
+                <textarea 
+                  placeholder="Special instructions or quality notes..."
+                  className="w-full bg-stone-50 dark:bg-stone-800/60 border border-stone-100 dark:border-stone-800 p-4 rounded-xl text-xs font-bold outline-none focus:border-stone-300 transition-colors placeholder:text-stone-400 placeholder:opacity-60 text-primary resize-none h-24"
+                  value={formData.notes}
+                  onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                />
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button 
+                  type="button"
+                  onClick={() => {
+                    hapticFeedback.light();
+                    setIsAdding(false);
+                    setEditingClient(null);
+                  }}
+                  className="flex-1 h-14 rounded-2xl font-bold text-stone-500 bg-stone-100 dark:bg-stone-800 dark:text-stone-400 hover:bg-stone-200 dark:hover:bg-stone-750 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit"
+                  className={cn(
+                    "flex-[2] h-14 rounded-2xl font-bold text-white transition-all shadow-lg",
+                    editingClient ? "bg-amber-600 shadow-amber-600/20" : "bg-primary shadow-primary/20"
+                  )}
+                >
+                  {editingClient ? 'Update Profile' : 'Register Supplier'}
+                </button>
+              </div>
+            </form>
+          </Card>
+        </div>
+      </motion.div>
+    );
+  }
+
   if (selectedClientId && selectedClient) {
     return (
       <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
@@ -291,108 +394,7 @@ export const Clients: React.FC = () => {
         )}
       </div>
 
-      {/* Add Client Modal */}
-      <AnimatePresence>
-        {isAdding && (
-          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-            <motion.div 
-               initial={{ opacity: 0 }} 
-               animate={{ opacity: 1 }} 
-               exit={{ opacity: 0 }} 
-               className="absolute inset-0 bg-stone-900/40 backdrop-blur-sm" 
-               onClick={() => setIsAdding(false)}
-            />
-            <motion.div 
-               initial={{ scale: 0.9, opacity: 0, y: 20 }}
-               animate={{ scale: 1, opacity: 1, y: 0 }}
-               exit={{ scale: 0.9, opacity: 0, y: 20 }}
-               className="bg-white dark:bg-stone-900 rounded-[32px] w-full max-w-sm overflow-hidden relative shadow-2xl"
-            >
-              <div className="p-6">
-                <Heading className="mb-1">{editingClient ? 'Edit Client' : 'New Client'}</Heading>
-                <Subtext className="mb-6">{editingClient ? 'Update profile information' : 'Registration profile'}</Subtext>
 
-                <form onSubmit={handleSaveClient} className="space-y-4">
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-black text-stone-400 uppercase ml-2">Name *</label>
-                    <input 
-                      required
-                      type="text" 
-                      placeholder="e.g. Ramesh Patel"
-                      className="w-full bg-stone-50 dark:bg-stone-800 border-0 h-12 px-4 rounded-xl text-sm focus:ring-2 focus:ring-[#2D5A27]/20 outline-none"
-                      value={formData.fullName}
-                      onChange={(e) => setFormData({...formData, fullName: e.target.value})}
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-black text-stone-400 uppercase ml-2">Phone</label>
-                    <input 
-                      type="tel" 
-                      placeholder="+91..."
-                      className="w-full bg-stone-50 dark:bg-stone-800 border-0 h-12 px-4 rounded-xl text-sm focus:ring-2 focus:ring-[#2D5A27]/20 outline-none"
-                      value={formData.phoneNumber}
-                      onChange={(e) => setFormData({...formData, phoneNumber: e.target.value})}
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-black text-stone-400 uppercase ml-2">Address</label>
-                    <input 
-                      type="text" 
-                      placeholder="Street, Village..."
-                      className="w-full bg-stone-50 dark:bg-stone-800 border-0 h-12 px-4 rounded-xl text-sm focus:ring-2 focus:ring-[#2D5A27]/20 outline-none"
-                      value={formData.address}
-                      onChange={(e) => setFormData({...formData, address: e.target.value})}
-                    />
-                  </div>
-                  <div className="grid grid-cols-1 gap-3">
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-black text-stone-400 uppercase ml-2">Rate (₹/KG)</label>
-                      <input 
-                        type="number" 
-                        step="0.01"
-                        className="w-full bg-stone-50 dark:bg-stone-800 border-0 h-12 px-4 rounded-xl text-sm focus:ring-2 focus:ring-[#2D5A27]/20 outline-none"
-                        value={formData.fallbackRate}
-                        onChange={(e) => setFormData({...formData, fallbackRate: parseFloat(e.target.value) || 0})}
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-black text-stone-400 uppercase ml-2">Notes</label>
-                    <textarea 
-                      placeholder="Special instructions..."
-                      className="w-full bg-stone-50 dark:bg-stone-800 border-0 h-24 p-4 rounded-xl text-sm focus:ring-2 focus:ring-[#2D5A27]/20 outline-none resize-none"
-                      value={formData.notes}
-                      onChange={(e) => setFormData({...formData, notes: e.target.value})}
-                    />
-                  </div>
-
-                  <div className="flex gap-3 pt-6">
-                    <button 
-                      type="button"
-                      onClick={() => {
-                        setIsAdding(false);
-                        setEditingClient(null);
-                      }}
-                      className="flex-1 h-14 rounded-2xl font-bold text-stone-500 bg-stone-100 hover:bg-stone-200 transition-colors"
-                    >
-                      Cancel
-                    </button>
-                    <button 
-                      type="submit"
-                      className={cn(
-                        "flex-[2] h-14 rounded-2xl font-bold text-white transition-all shadow-lg",
-                        editingClient ? "bg-amber-600 shadow-amber-600/20" : "bg-primary shadow-primary/20"
-                      )}
-                    >
-                      {editingClient ? 'Update Profile' : 'Create Account'}
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
 
       {/* Payment and Prepaid Modal */}
       <AnimatePresence>

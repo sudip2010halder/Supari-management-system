@@ -19,7 +19,8 @@ import { hapticFeedback } from '../lib/haptics';
 export const ProductionEntry: React.FC = () => {
   const { clients, settings, addLedgerEntry } = useData();
   const [selectedClientId, setSelectedClientId] = useState('');
-  const [weight, setWeight] = useState('');
+  const [mone, setMone] = useState('');
+  const [kg, setKg] = useState('');
   const [rate, setRate] = useState(settings.baseRate.toString());
   const [paid, setPaid] = useState('');
   const [notes, setNotes] = useState('');
@@ -38,7 +39,11 @@ export const ProductionEntry: React.FC = () => {
   }, [selectedClient, settings.baseRate]);
 
   // Derived Values
-  const numericWeight = parseFloat(weight) || 0;
+  const numericWeight = useMemo(() => {
+    const m = parseFloat(mone) || 0;
+    const k = parseFloat(kg) || 0;
+    return (m * 40) + k;
+  }, [mone, kg]);
   const numericRate = parseFloat(rate) || 0;
   const numericPaid = parseFloat(paid) || 0;
   
@@ -54,8 +59,8 @@ export const ProductionEntry: React.FC = () => {
 
   const handleAddWeight = (amt: number) => {
     hapticFeedback.light();
-    const current = parseFloat(weight) || 0;
-    setWeight((current + amt).toString());
+    const currentKg = parseFloat(kg) || 0;
+    setKg((currentKg + amt).toString());
   };
 
   const filteredClients = useMemo(() => 
@@ -82,7 +87,8 @@ export const ProductionEntry: React.FC = () => {
       setIsSuccess(false);
       // Reset form
       setSelectedClientId('');
-      setWeight('');
+      setMone('');
+      setKg('');
       setPaid('');
       setNotes('');
     }, 2000);
@@ -168,35 +174,62 @@ export const ProductionEntry: React.FC = () => {
         </div>
 
         {/* Combined Input Section */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-3 gap-2 md:gap-4">
            <div className="space-y-2">
-              <label className="text-[10px] font-black text-stone-400 uppercase ml-2 tracking-widest text-center block">Weight</label>
-              <div className="bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 p-4 rounded-3xl text-center">
+              <label className="text-[10px] font-black text-stone-400 uppercase tracking-widest text-center block">Mone</label>
+              <div className="bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 p-3 md:p-4 rounded-3xl text-center">
+                 <input 
+                   type="number" 
+                   step="1"
+                   placeholder="0"
+                   className="w-full bg-transparent text-xl md:text-2xl font-black text-center focus:outline-none text-primary"
+                   value={mone}
+                   onChange={(e) => setMone(e.target.value)}
+                 />
+                 <p className="text-[10px] font-bold text-stone-300">40 KG/MONE</p>
+              </div>
+           </div>
+           
+           <div className="space-y-2">
+              <label className="text-[10px] font-black text-stone-400 uppercase tracking-widest text-center block">Kilogram</label>
+              <div className="bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 p-3 md:p-4 rounded-3xl text-center">
                  <input 
                    type="number" 
                    step="0.01"
                    placeholder="0.00"
-                   className="w-full bg-transparent text-2xl font-black text-center focus:outline-none"
-                   value={weight}
-                   onChange={(e) => setWeight(e.target.value)}
+                   className="w-full bg-transparent text-xl md:text-2xl font-black text-center focus:outline-none text-primary"
+                   value={kg}
+                   onChange={(e) => setKg(e.target.value)}
                  />
-                 <p className="text-[10px] font-bold text-stone-300">KILOGRAMS</p>
+                 <p className="text-[10px] font-bold text-stone-300">KG</p>
               </div>
            </div>
+
            <div className="space-y-2">
-              <label className="text-[10px] font-black text-stone-400 uppercase ml-2 tracking-widest text-center block">Rate</label>
-              <div className="bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 p-4 rounded-3xl text-center opacity-70">
+              <label className="text-[10px] font-black text-stone-400 uppercase tracking-widest text-center block">Rate</label>
+              <div className="bg-white dark:bg-stone-900 border border-stone-100 dark:border-stone-800 p-3 md:p-4 rounded-3xl text-center opacity-70">
                  <input 
                    type="number" 
                    step="0.1"
-                   className="w-full bg-transparent text-2xl font-black text-center focus:outline-none"
+                   placeholder="0.0"
+                   className="w-full bg-transparent text-xl md:text-2xl font-black text-center focus:outline-none text-primary"
                    value={rate}
                    onChange={(e) => setRate(e.target.value)}
                  />
-                 <p className="text-[10px] font-bold text-stone-300">PRICE / KG</p>
+                 <p className="text-[10px] font-bold text-stone-300">/ KG</p>
               </div>
            </div>
         </div>
+
+        {/* Calculated Total Weight bar */}
+        {(parseFloat(mone) > 0 || parseFloat(kg) > 0) && (
+          <div className="text-center bg-stone-50 dark:bg-stone-800/40 p-3 rounded-2xl border border-stone-100 dark:border-stone-800">
+             <span className="text-[9px] font-black text-stone-400 uppercase tracking-widest block leading-none mb-1">Calculated Total Weight</span>
+             <p className="text-sm font-black text-primary uppercase tracking-tight">
+                {mone || '0'} MONE & {kg || '0'} KG = <span className="text-primary font-black underline decoration-2 decoration-[#2D5A27] underline-offset-4">{numericWeight.toFixed(2)} KG</span>
+             </p>
+          </div>
+        )}
 
         {/* Quick Weight Chips */}
         <div className="flex flex-wrap gap-2 justify-center">
@@ -212,7 +245,10 @@ export const ProductionEntry: React.FC = () => {
           ))}
           <button 
             type="button" 
-            onClick={() => setWeight('0')} 
+            onClick={() => {
+              setMone('');
+              setKg('');
+            }} 
             className="px-5 py-3 bg-error-light rounded-2xl text-xs font-black uppercase tracking-widest text-error-base"
           >
             Reset
